@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ויז'ן AI | עיצוב מודרני</title>
+    <!-- טעינת Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- טעינת Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            direction: rtl;
+            background: #f1f5f9; /* רקע בהיר */
+            color: #374151; /* טקסט כהה יותר */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            transition: background-color 0.5s ease;
+        }
+
+        .container {
+            background: #ffffff; /* קונטיינר לבן */
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 3rem 2.5rem;
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            color: #1f2937;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            color: #1f2937;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #4b5563;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+            margin-bottom: 1.5rem;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+        input[type="file"]::file-selector-button {
+            border: 1px solid #9ca3af;
+            padding: 0.5rem 1rem;
+            background-color: #e5e7eb;
+            color: #1f2937;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #d1d5db;
+        }
+
+        textarea, select {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+            margin-bottom: 1.5rem;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+
+        textarea {
+            height: 120px;
+            resize: none;
+        }
+
+        textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        textarea:focus, select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        /* כפתורי גלולה */
+        .action-button {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            color: white;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            border: none;
+        }
+
+        .action-button:hover {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .main-button {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .main-button:hover {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+        }
+        
+        .secondary-button {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            box-shadow: none;
+            transition: background-color 0.3s, transform 0.2s;
+            border: 1px solid #d1d5db;
+        }
+        .secondary-button:hover {
+            background-color: #d1d5db;
+            transform: translateY(-2px);
+        }
+        
+        /* אנימציות כניסה */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        /* עיצוב חדש לדף הבית */
+        .demo-animation {
+            width: 100%;
+            height: 300px;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            background: #f9fafb;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #6b7280;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+        .demo-text-animation {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            padding: 1rem;
+        }
+        
+        .download-btn-small {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            background: #22c55e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.4);
+            border: none;
+            z-index: 10;
+        }
+        .download-btn-small:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.6);
+        }
+        
+        /* אייקון הורדה (SVG) */
+        .download-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            min-height: 200px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #tour-page-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            background: #000;
+            border-radius: 1.5rem;
+            overflow: hidden;
+        }
+
+        #tour-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+<body onload="animateElements(); startDemoAnimation();">
+    <div class="container animate-in" style="animation-delay: 0.1s;">
+        <!-- דף הבית -->
+        <div id="home-page" class="flex flex-col items-center justify-center min-h-full">
+            <h1>ויז'ן AI</h1>
+            <p class="text-lg text-gray-600 mb-8 max-w-lg leading-relaxed animate-in" style="animation-delay: 0.3s;">
+                הכלי המתקדם ליצירת ועריכת תמונות באמצעות בינה מלאכותית.
+            </p>
+
+            <!-- אנימציה של הדגמת המודל -->
+            <div id="demo-animation" class="demo-animation animate-in" style="animation-delay: 0.5s;">
+                <div id="demo-text" class="demo-text-animation"></div>
+            </div>
+
+            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 md:space-x-reverse mt-8 w-full">
+                <button class="action-button" data-page="model-page">צור תמונה</button>
+                <button class="action-button secondary-button" data-page="edit-page">ערוך תמונה</button>
+                <button class="action-button secondary-button" data-page="tour-page">סיור 360°</button>
+            </div>
+            <p class="text-xs text-gray-500 mt-8">מופעל על ידי Gemini</p>
+        </div>
+
+        <!-- דף יצירת התמונה (מוסתר בהתחלה) -->
+        <div id="model-page" class="hidden">
+            <h2>צור את היצירה שלך</h2>
+            <p class="text-gray-600 mb-6">הזן תיאור מפורט ככל האפשר עבור התמונה שתרצה ליצור.</p>
+            
+            <label for="prompt-input" class="text-right block mb-2">תיאור התמונה</label>
+            <textarea id="prompt-input" placeholder="לדוגמה: יער קסום עם פטריות זוהרות, בסגנון פנטזיה..." class="rounded-lg shadow-sm"></textarea>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label for="style-select" class="text-right block mb-2">סגנון אמנותי</label>
+                    <select id="style-select" class="rounded-lg shadow-sm">
+                        <option value="">ללא סגנון</option>
+                        <option value=", בסגנון ציור שמן">ציור שמן</option>
+                        <option value=", בסגנון אקוורל">אקוורל (צבעי מים)</option>
+                        <option value=", אומנות דיגיטלית">אומנות דיגיטלית</option>
+                        <option value=", בסגנון סייברפאנק">סייברפאנק</option>
+                        <option value=", בסגנון פנטזיה">פנטזיה</option>
+                        <option value=", בסגנון אנימה">אנימה</option>
+                        <option value=", בסגנון ריאליזם">ריאליזם</option>
+                        <option value=", בסגנון מדע בדיוני">מדע בדיוני</option>
+                        <option value=", בסגנון מופשט">אמנות מופשטת</option>
+                        <option value=", בסגנון פוטוריסטי">סגנון פוטוריסטי</option>
+                        <option value=", בסגנון פיקסל ארט">פיקסל ארט</option>
+                        <option value=", צילום מאקרו">צילום מאקרו</option>
+                        <option value=", בסגנון קריקטורה">קריקטורה</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="atmosphere-select" class="text-right block mb-2">אווירה ותאורה</label>
+                    <select id="atmosphere-select" class="rounded-lg shadow-sm">
+                        <option value="">ללא אווירה</option>
+                        <option value=", בתאורת בוקר בהירה ורכה">בוקר בהיר</option>
+                        <option value=", בתאורת לילה רומנטית">לילה רומנטי</option>
+                        <option value=", בתאורה דרמטית וחזקה">תאורה דרמטית</option>
+                        <option value=", בתאורה אטמוספרית עמוקה">אווירה אטמוספרית</option>
+                        <option value=", באווירה חלומית, עם אור רך">אווירה חלומית</option>
+                        <option value=", עם גוונים חמים של שקיעה">שקיעה</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="generate-btn" class="action-button main-button">צור תמונה</button>
+            
+            <div id="image-container-create" class="relative">
+                <div id="loading-indicator-create" class="loading-container hidden">
+                    <div class="spinner"></div>
+                </div>
+                <img id="generated-image-create" src="" alt="תמונה שנוצרה על ידי בינה מלאכותית" class="w-full rounded-xl shadow-lg">
+                <button id="download-create-btn" class="download-btn-small" style="display:none;">
+                    <svg class="download-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <p id="error-message-create" class="text-red-500 mt-4"></p>
+            <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 md:space-x-reverse justify-center w-full">
+                <button id="copy-create-btn" class="secondary-button" style="display:none;">העתק תיאור</button>
+                <button id="back-to-home-btn-1" class="secondary-button">חזור לדף הבית</button>
+            </div>
+        </div>
+
+        <!-- דף עריכת תמונה (מוסתר בהתחלה) -->
+        <div id="edit-page" class="hidden">
+            <h2>ערוך תמונה קיימת</h2>
+            <p class="text-gray-600 mb-6">העלה/י תמונה ובחר/י מה לשנות בה.</p>
+            
+            <label for="image-upload" class="text-right block mb-2">העלה תמונה</label>
+            <input type="file" id="image-upload" accept="image/*" class="w-full rounded-lg shadow-sm">
+
+            <label for="edit-prompt-input" class="text-right block mb-2">מה תרצה לשנות בתמונה?</label>
+            <textarea id="edit-prompt-input" placeholder="לדוגמה: הוסף כובע אדום לדמות..." class="rounded-lg shadow-sm"></textarea>
+
+            <button id="edit-generate-btn" class="action-button main-button">ערוך תמונה</button>
+            
+            <div id="image-container-edit" class="relative">
+                <div id="loading-indicator-edit" class="loading-container hidden">
+                    <div class="spinner"></div>
+                </div>
+                <img id="generated-image-edit" src="" alt="תמונה ערוכה על ידי בינה מלאכותית" class="w-full rounded-xl shadow-lg">
+                <button id="download-edit-btn" class="download-btn-small" style="display:none;">
+                     <svg class="download-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <p id="error-message-edit" class="text-red-500 mt-4"></p>
+            <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 md:space-x-reverse justify-center w-full">
+                <button id="copy-edit-btn" class="secondary-button" style="display:none;">העתק תיאור</button>
+                <button id="back-to-home-btn-2" class="secondary-button">חזור לדף הבית</button>
+            </div>
+        </div>
+
+        <!-- דף סיור 360 (מוסתר בהתחלה) -->
+        <div id="tour-page" class="hidden">
+            <h2>צור סיור 360°</h2>
+            <p class="text-gray-600 mb-6">הזן תיאור ליצירת תמונה פנורמית שתוכל לסובב ב-360 מעלות.</p>
+            
+            <label for="tour-prompt-input" class="text-right block mb-2">תיאור הסיור</label>
+            <textarea id="tour-prompt-input" placeholder="לדוגמה: נוף הרים עוצר נשימה בשקיעה, פנורמה 360..." class="rounded-lg shadow-sm"></textarea>
+            
+            <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 md:space-x-reverse justify-center w-full">
+                <button id="tour-generate-btn" class="action-button main-button">צור סיור</button>
+                <button id="fullscreen-tour-btn" class="secondary-button" style="display:none;">מסך מלא</button>
+            </div>
+
+            <div id="tour-page-container">
+                <div id="loading-indicator-tour" class="loading-container hidden">
+                    <div class="spinner"></div>
+                </div>
+                <canvas id="tour-canvas"></canvas>
+            </div>
+            
+            <p id="error-message-tour" class="text-red-500 mt-4"></p>
+            <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 md:space-x-reverse justify-center w-full">
+                <button id="download-tour-btn" class="secondary-button" style="display:none;">הורד תמונה</button>
+                <button id="back-to-home-btn-3" class="secondary-button">חזור לדף הבית</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // קבלת הפניות לאלמנטים ב-HTML
+        const homePage = document.getElementById('home-page');
+        const modelPage = document.getElementById('model-page');
+        const editPage = document.getElementById('edit-page');
+        const tourPage = document.getElementById('tour-page');
+
+        // כפתורי ניווט
+        const actionButtons = document.querySelectorAll('.action-button[data-page]');
+        const backToHomeBtns = document.querySelectorAll('[id^="back-to-home-btn"]');
+
+        // אלמנטים של יצירת תמונה
+        const promptInput = document.getElementById('prompt-input');
+        const styleSelect = document.getElementById('style-select');
+        const atmosphereSelect = document.getElementById('atmosphere-select');
+        const generateBtn = document.getElementById('generate-btn');
+        const downloadCreateBtn = document.getElementById('download-create-btn');
+        const copyCreateBtn = document.getElementById('copy-create-btn');
+        const loadingIndicatorCreate = document.getElementById('loading-indicator-create');
+        const imageContainerCreate = document.getElementById('image-container-create');
+        const generatedImageCreate = document.getElementById('generated-image-create');
+        const errorMessageCreate = document.getElementById('error-message-create');
+        
+        // אלמנטים של עריכת תמונה
+        const imageUpload = document.getElementById('image-upload');
+        const editPromptInput = document.getElementById('edit-prompt-input');
+        const editGenerateBtn = document.getElementById('edit-generate-btn');
+        const downloadEditBtn = document.getElementById('download-edit-btn');
+        const copyEditBtn = document.getElementById('copy-edit-btn');
+        const loadingIndicatorEdit = document.getElementById('loading-indicator-edit');
+        const imageContainerEdit = document.getElementById('image-container-edit');
+        const generatedImageEdit = document.getElementById('generated-image-edit');
+        const errorMessageEdit = document.getElementById('error-message-edit');
+        
+        // אלמנטים של סיור 360
+        const tourPromptInput = document.getElementById('tour-prompt-input');
+        const tourGenerateBtn = document.getElementById('tour-generate-btn');
+        const loadingIndicatorTour = document.getElementById('loading-indicator-tour');
+        const tourCanvas = document.getElementById('tour-canvas');
+        const tourContainer = document.getElementById('tour-page-container');
+        const errorMessageTour = document.getElementById('error-message-tour');
+        const downloadTourBtn = document.getElementById('download-tour-btn');
+        const fullscreenTourBtn = document.getElementById('fullscreen-tour-btn');
+
+        const demoText = document.getElementById('demo-text');
+        const demoTexts = [
+            "הפוך טקסט לתמונה ויזואלית",
+            "ערוך תמונות קיימות בקלות",
+            "הוסף והסר אלמנטים",
+            "קבל השראה וצור אמנות"
+        ];
+        let currentDemoTextIndex = 0;
+
+        // הגדרת קבוע עבור מודל יצירת התמונות
+        const API_MODEL = 'imagen-3.0-generate-002';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:predict?key=${''}`;
+
+        // פונקציית אנימציית הטקסט בדף הבית
+        function startDemoAnimation() {
+            function updateText() {
+                demoText.style.opacity = '0';
+                setTimeout(() => {
+                    currentDemoTextIndex = (currentDemoTextIndex + 1) % demoTexts.length;
+                    demoText.textContent = demoTexts[currentDemoTextIndex];
+                    demoText.style.opacity = '1';
+                }, 1000); // Wait for fade out
+            }
+            updateText();
+            setInterval(updateText, 4000); // שינוי טקסט כל 4 שניות
+        }
+        
+        // פונקציית מעבר בין דפים
+        function showPage(pageId) {
+            homePage.classList.add('hidden');
+            modelPage.classList.add('hidden');
+            editPage.classList.add('hidden');
+            tourPage.classList.add('hidden');
+            
+            const currentPage = document.getElementById(pageId);
+            currentPage.classList.remove('hidden');
+            currentPage.classList.add('animate-in');
+            
+            if (pageId === 'tour-page') {
+                setTimeout(initThreeJS, 100);
+            }
+        }
+
+        actionButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const pageId = btn.getAttribute('data-page');
+                showPage(pageId);
+            });
+        });
+
+        backToHomeBtns.forEach(btn => btn.addEventListener('click', () => showPage('home-page')));
+
+        // פונקציית עזר להמרת קובץ לתמונה בפורמט Base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // פונקציה שמטפלת בשליחת הבקשה ליצירת תמונה
+        generateBtn.addEventListener('click', async () => {
+            const userPrompt = promptInput.value.trim();
+            const selectedStyle = styleSelect.value;
+            const selectedAtmosphere = atmosphereSelect.value;
+            let finalPrompt = userPrompt;
+
+            if (userPrompt === '') {
+                errorMessageCreate.textContent = 'אנא הכנס/י תיאור לתמונה.';
+                errorMessageCreate.style.display = 'block';
+                imageContainerCreate.style.display = 'none';
+                return;
+            }
+
+            if (selectedStyle) {
+                finalPrompt += selectedStyle;
+            }
+            if (selectedAtmosphere) {
+                finalPrompt += selectedAtmosphere;
+            }
+            
+            imageContainerCreate.classList.remove('visible');
+            downloadCreateBtn.style.display = 'none';
+            copyCreateBtn.style.display = 'none';
+            errorMessageCreate.style.display = 'none';
+            imageContainerCreate.style.display = 'block';
+            loadingIndicatorCreate.style.display = 'block';
+            generatedImageCreate.src = '';
+            generatedImageCreate.style.opacity = '0.3';
+            
+            const payload = {
+                instances: [{ prompt: finalPrompt }],
+                parameters: { "sampleCount": 1 }
+            };
+
+            const maxRetries = 3;
+            let attempt = 0;
+            let success = false;
+            let lastError = null;
+
+            while (attempt < maxRetries && !success) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+
+                    if (!base64Data) {
+                        throw new Error('לא התקבלה תמונה מהשרת.');
+                    }
+
+                    const imageUrl = `data:image/png;base64,${base64Data}`;
+                    generatedImageCreate.src = imageUrl;
+                    imageContainerCreate.classList.add('visible');
+                    downloadCreateBtn.style.display = 'flex';
+                    copyCreateBtn.style.display = 'block';
+                    generatedImageCreate.style.opacity = '1';
+                    success = true;
+
+                } catch (error) {
+                    lastError = error;
+                    attempt++;
+                    console.error(`Attempt ${attempt} failed:`, error);
+                    if (attempt < maxRetries) {
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                    }
+                }
+            }
+
+            if (!success) {
+                console.error('All retries failed:', lastError);
+                errorMessageCreate.textContent = 'אירעה שגיאה בעת יצירת התמונה. אנא נסה שוב מאוחר יותר.';
+                errorMessageCreate.style.display = 'block';
+            }
+            
+            loadingIndicatorCreate.style.display = 'none';
+        });
+
+        // פונקציה שמטפלת בשליחת הבקשה לעריכת תמונה
+        editGenerateBtn.addEventListener('click', async () => {
+            const userPrompt = editPromptInput.value.trim();
+            const file = imageUpload.files[0];
+
+            if (!file) {
+                errorMessageEdit.textContent = 'אנא העלה/י תמונה לעריכה.';
+                errorMessageEdit.style.display = 'block';
+                imageContainerEdit.style.display = 'none';
+                return;
+            }
+            if (userPrompt === '') {
+                errorMessageEdit.textContent = 'אנא הכנס/י תיאור לשינוי התמונה.';
+                errorMessageEdit.style.display = 'block';
+                imageContainerEdit.style.display = 'none';
+                return;
+            }
+            
+            imageContainerEdit.classList.remove('visible');
+            downloadEditBtn.style.display = 'none';
+            copyEditBtn.style.display = 'none';
+            errorMessageEdit.style.display = 'none';
+            imageContainerEdit.style.display = 'block';
+            loadingIndicatorEdit.style.display = 'block';
+            generatedImageEdit.src = '';
+            generatedImageEdit.style.opacity = '0.3';
+            
+            try {
+                const base64Image = await fileToBase64(file);
+                
+                const payload = {
+                    contents: [{
+                        parts: [
+                            { text: userPrompt },
+                            {
+                                inlineData: {
+                                    mimeType: file.type,
+                                    data: base64Image
+                                }
+                            }
+                        ]
+                    }],
+                    generationConfig: {
+                        responseModalities: ['TEXT', 'IMAGE']
+                    },
+                };
+                
+                const maxRetries = 3;
+                let attempt = 0;
+                let success = false;
+                let lastError = null;
+
+                while (attempt < maxRetries && !success) {
+                    try {
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+
+                        if (!base64Data) {
+                            throw new Error('לא התקבלה תמונה מהשרת.');
+                        }
+
+                        const imageUrl = `data:image/png;base64,${base64Data}`;
+                        generatedImageEdit.src = imageUrl;
+                        imageContainerEdit.classList.add('visible');
+                        downloadEditBtn.style.display = 'flex';
+                        copyEditBtn.style.display = 'block';
+                        generatedImageEdit.style.opacity = '1';
+                        success = true;
+
+                    } catch (error) {
+                        lastError = error;
+                        attempt++;
+                        console.error(`Attempt ${attempt} failed:`, error);
+                        if (attempt < maxRetries) {
+                            const delay = Math.pow(2, attempt) * 1000;
+                            await new Promise(res => setTimeout(res, delay));
+                        }
+                    }
+                }
+
+                if (!success) {
+                    console.error('All retries failed:', lastError);
+                    errorMessageEdit.textContent = 'אירעה שגיאה בעת יצירת התמונה. אנא נסה שוב מאוחר יותר.';
+                    errorMessageEdit.style.display = 'block';
+                }
+
+            } catch (error) {
+                errorMessageEdit.textContent = 'אירעה שגיאה בעת העלאת התמונה. אנא נסה/י קובץ אחר.';
+                errorMessageEdit.style.display = 'block';
+            }
+            
+            loadingIndicatorEdit.style.display = 'none';
+        });
+
+        // פונקציה להורדת התמונה
+        downloadCreateBtn.addEventListener('click', () => {
+            const imageURL = generatedImageCreate.src;
+            if (imageURL && imageURL !== "") {
+                const link = document.createElement('a');
+                link.href = imageURL;
+                link.download = 'generated_image.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+
+        downloadEditBtn.addEventListener('click', () => {
+            const imageURL = generatedImageEdit.src;
+            if (imageURL && imageURL !== "") {
+                const link = document.createElement('a');
+                link.href = imageURL;
+                link.download = 'edited_image.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+        
+        // פונקציית הורדה לתמונת 360
+        downloadTourBtn.addEventListener('click', () => {
+            const imageURL = tourCanvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.href = imageURL;
+            link.download = '360_tour_image.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // פונקציה להעתקת התיאור
+        copyCreateBtn.addEventListener('click', () => {
+            const userPrompt = promptInput.value.trim();
+            const selectedStyle = styleSelect.options[styleSelect.selectedIndex].text;
+            const selectedAtmosphere = atmosphereSelect.options[atmosphereSelect.selectedIndex].text;
+            let finalPrompt = userPrompt;
+
+            if (selectedStyle !== 'ללא סגנון') {
+                finalPrompt += ' ' + selectedStyle;
+            }
+            if (selectedAtmosphere !== 'ללא אווירה') {
+                finalPrompt += ' ' + selectedAtmosphere;
+            }
+
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = finalPrompt;
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextarea);
+
+            const originalText = copyCreateBtn.textContent;
+            copyCreateBtn.textContent = 'הועתק!';
+            setTimeout(() => {
+                copyCreateBtn.textContent = originalText;
+            }, 2000);
+        });
+        
+        copyEditBtn.addEventListener('click', () => {
+            const userPrompt = editPromptInput.value.trim();
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = userPrompt;
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextarea);
+
+            const originalText = copyEditBtn.textContent;
+            copyEditBtn.textContent = 'הועתק!';
+            setTimeout(() => {
+                copyEditBtn.textContent = originalText;
+            }, 2000);
+        });
+
+        function animateElements() {
+            const elements = document.querySelectorAll('.animate-in');
+            elements.forEach(el => el.style.opacity = 1);
+        }
+
+        // Three.js 360 Tour functionality
+        let scene, camera, renderer, sphere;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        const rotationSpeed = 0.005;
+
+        function initThreeJS() {
+            // Check if Three.js is already initialized
+            if (scene) return;
+
+            // Scene
+            scene = new THREE.Scene();
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, tourContainer.clientWidth / tourContainer.clientHeight, 0.1, 1000);
+            camera.position.set(0.0001, 0, 0); // small offset to prevent camera inside sphere issue
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ canvas: tourCanvas, antialias: true });
+            renderer.setSize(tourContainer.clientWidth, tourContainer.clientHeight);
+            window.addEventListener('resize', onWindowResize, false);
+            
+            // Mouse controls for rotation
+            tourCanvas.addEventListener('mousedown', onMouseDown, false);
+            window.addEventListener('mousemove', onMouseMove, false);
+            window.addEventListener('mouseup', onMouseUp, false);
+            
+            // Animation loop
+            animate();
+        }
+
+        function onWindowResize() {
+            camera.aspect = tourContainer.clientWidth / tourContainer.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(tourContainer.clientWidth, tourContainer.clientHeight);
+        }
+        
+        function onMouseDown(event) {
+            isDragging = true;
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        }
+
+        function onMouseMove(event) {
+            if (!isDragging) return;
+            const deltaMove = {
+                x: event.clientX - previousMousePosition.x,
+                y: event.clientY - previousMousePosition.y
+            };
+            
+            const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+            euler.setFromQuaternion(camera.quaternion);
+
+            euler.y += deltaMove.x * rotationSpeed;
+            euler.x += deltaMove.y * rotationSpeed;
+
+            const maxPitch = Math.PI / 2 - 0.1; // Prevent flipping
+            euler.x = Math.max(-maxPitch, Math.min(maxPitch, euler.x));
+
+            camera.quaternion.setFromEuler(euler);
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        }
+
+        function onMouseUp(event) {
+            isDragging = false;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (renderer) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        fullscreenTourBtn.addEventListener('click', () => {
+            if (tourCanvas.requestFullscreen) {
+                tourCanvas.requestFullscreen();
+            } else if (tourCanvas.webkitRequestFullscreen) { /* Safari */
+                tourCanvas.webkitRequestFullscreen();
+            } else if (tourCanvas.msRequestFullscreen) { /* IE11 */
+                tourCanvas.msRequestFullscreen();
+            }
+        });
+        
+        tourGenerateBtn.addEventListener('click', async () => {
+            const userPrompt = tourPromptInput.value.trim();
+            if (userPrompt === '') {
+                errorMessageTour.textContent = 'אנא הכנס/י תיאור לתמונה.';
+                errorMessageTour.style.display = 'block';
+                return;
+            }
+            
+            errorMessageTour.style.display = 'none';
+            loadingIndicatorTour.style.display = 'flex';
+            downloadTourBtn.style.display = 'none';
+            fullscreenTourBtn.style.display = 'none';
+            tourCanvas.style.opacity = '0.2';
+            
+            // Create a custom prompt for a panoramic image
+            const panoramicPrompt = `${userPrompt}, a high-resolution 360-degree panoramic image.`;
+            
+            const payload = { 
+                instances: [{ prompt: panoramicPrompt }],
+                parameters: { "sampleCount": 1 }
+            };
+
+            const maxRetries = 3;
+            let attempt = 0;
+            let success = false;
+            let lastError = null;
+
+            while (attempt < maxRetries && !success) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+
+                    if (!base64Data) {
+                        throw new Error('לא התקבלה תמונה מהשרת.');
+                    }
+                    
+                    const imageUrl = `data:image/png;base64,${base64Data}`;
+                    
+                    // Load the image texture
+                    const textureLoader = new THREE.TextureLoader();
+                    const texture = textureLoader.load(imageUrl, () => {
+                        // Once the texture is loaded, create the sphere
+                        if (sphere) {
+                            scene.remove(sphere); // Remove old sphere
+                        }
+                        
+                        const geometry = new THREE.SphereGeometry(500, 60, 40);
+                        // Invert the geometry faces so the texture is visible from the inside
+                        geometry.scale(-1, 1, 1);
+                        const material = new THREE.MeshBasicMaterial({ map: texture });
+                        sphere = new THREE.Mesh(geometry, material);
+                        scene.add(sphere);
+
+                        loadingIndicatorTour.style.display = 'none';
+                        downloadTourBtn.style.display = 'block';
+                        fullscreenTourBtn.style.display = 'block';
+                        tourCanvas.style.opacity = '1';
+                    });
+                    success = true;
+                } catch (error) {
+                    lastError = error;
+                    attempt++;
+                    console.error(`Attempt ${attempt} failed:`, error);
+                    if (attempt < maxRetries) {
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                    }
+                }
+            }
+            
+            if (!success) {
+                console.error('All retries failed:', lastError);
+                errorMessageTour.textContent = 'אירעה שגיאה בעת יצירת הסיור. אנא נסה שוב מאוחר יותר.';
+                errorMessageTour.style.display = 'block';
+                loadingIndicatorTour.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
+
